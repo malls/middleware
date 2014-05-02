@@ -10,15 +10,14 @@ var serverMethods = {
 
   serveRoute: function(route){
     http.get(route, function(res){
-      this.prototype.serverResponse += res;
-      console.log(res,"from server");
+      this.serverResponse += res;
     });
   },
 
   serveRes: function(){},
 
   next: function(){
-    return (function(){
+    (function(){
       console.log("server response",this.serverResponse);
     })();
   },
@@ -41,7 +40,7 @@ var serverMethods = {
       arguments[0](this.serveRoute('/'), this.serveRes, this.next);
     } else {
       this.queue.push(fn);
-      fn(this.serveRoute(route), this.serveRes);
+      fn(this.serveRoute(route), this.serveRes, this.next);
     }      
   },
 
