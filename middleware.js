@@ -6,18 +6,42 @@ var serverMethods = {
 
   queue: [],
 
+  serverResponse: "",
+
+  serveRoute: function(route){
+    http.get(route, function(res){
+      this.prototype.serverResponse += res;
+      console.log(res,"from server");
+    });
+  },
+
+  serveRes: function(){},
+
+  next: function(){
+    return (function(){
+      console.log("server response",this.serverResponse);
+    })();
+  },
+
   up: function(){
     this.server = http.createServer();
+    this.serveRes.__proto__.write = function(x){
+      this.prototype.serverResponse += x;
+      console.log('use write',x);
+    };
+    this.serveRes.__proto__.end = function(x){
+      this.prototype.serverResponse += x;
+      console.log("end response",this.prototype.serverResponse);
+    };
   },
 
   use: function(route, fn){
     if(arguments.length === 1){
-      console.log(1);
       this.queue.push(arguments[0]);
+      arguments[0](this.serveRoute('/'), this.serveRes, this.next);
     } else {
-      console.log(2);
-      //do something with route
       this.queue.push(fn);
+      fn(this.serveRoute(route), this.serveRes);
     }      
   },
 
