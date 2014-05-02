@@ -1,7 +1,7 @@
 var middleware = require('./middleware');
  
 var app = middleware.createServer();
- 
+
 app.use(function (req, res, next) {
   res.write('a');
   next();

@@ -5,6 +5,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "mocha": "latest"
+    "mocha": "latest",
+    "request": "latest"
   }
 }

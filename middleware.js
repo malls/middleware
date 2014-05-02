@@ -1,35 +1,36 @@
-// make these functions
-
-  // - createServer()
-  // - use()
-  // - listen()
-
 var http = require('http');
 
-var createServer = function(param){
-  createServer.up();
-  return createServer;
-};
+var serverMethods = {
 
-createServer.__proto__ = {
+  server: null,
+
+  queue: [],
+
   up: function(){
+    this.server = http.createServer();
   },
 
   use: function(route, fn){
     if(arguments.length === 1){
       console.log(1);
-      //fn();
+      this.queue.push(arguments[0]);
     } else {
       console.log(2);
       //do something with route
-      // fn();
-    }  
+      this.queue.push(fn);
+    }      
   },
 
   listen: function(port, fn){
-    //connect to port;  
+    this.server.listen(port); 
     fn();
   }
+
+};
+
+var createServer = function(){
+  serverMethods.up();
+  return serverMethods;
 };
 
 module.exports.createServer = createServer;
