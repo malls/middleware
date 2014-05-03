@@ -3,50 +3,71 @@ var http = require('http');
 var serverMethods = {
 
   server: null,
-
+  counter: -1,
   queue: [],
+  serverResponses: {"/": ""},
 
-  serverResponse: "",
-
-  serveRoute: function(route){
-    http.get(route, function(res){
-      this.serverResponse += res;
+  up: function(){
+    this.server = http.createServer(function(req,res){
+      if(serverMethods.serverResponses[req.url]){
+        res.end(serverMethods.serverResponses[req.url]);
+      } else  {
+        res.end(serverMethods.serverResponses['/']);
+      }
     });
   },
 
-  serveRes: function(){},
-
-  next: function(){
-    (function(){
-      console.log("server response",this.serverResponse);
-    })();
-  },
-
-  up: function(){
-    this.server = http.createServer();
-    this.serveRes.__proto__.write = function(x){
-      this.prototype.serverResponse += x;
-      console.log('use write',x);
-    };
-    this.serveRes.__proto__.end = function(x){
-      this.prototype.serverResponse += x;
-      console.log("end response",this.prototype.serverResponse);
-    };
-  },
-
   use: function(route, fn){
-    if(arguments.length === 1){
-      this.queue.push(arguments[0]);
-      arguments[0](this.serveRoute('/'), this.serveRes, this.next);
+    this.queue.push(arguments);
+    if(arguments.length > 1){
+      serverMethods.serverResponses[route] = "";
+    }
+  },
+
+  useHandler: function(use){
+    var serveRoute = function(route){};
+
+    var serveRes = {};
+
+    if(arguments[0].length === 1){
+      serveRes.write = function(x){
+        for(var k in serverMethods.serverResponses){
+          serverMethods.serverResponses[k] += x;
+        }
+      };
+      serveRes.end = function(x){
+        serverMethods.serverResponses['/'] += x;
+      };
+      arguments[0][0](serveRoute('/'), serveRes, this.next);
+      if(arguments[0][0].length < 3){
+        this.next();
+      }
     } else {
-      this.queue.push(fn);
-      fn(this.serveRoute(route), this.serveRes, this.next);
+      var myRoute = arguments[0][0];
+      serveRes.write = function(x){
+        serverMethods.serverResponses[myRoute] += x;
+      };
+      serveRes.end = function(x){
+        serverMethods.serverResponses[myRoute] += x;
+      };   
+      arguments[0][1](serveRoute(myRoute), serveRes, this.next);
+      if(arguments[0][1].length < 3){
+        this.next();
+      }
     }      
+  },
+  
+  next: function(){
+    serverMethods.counter += 1;
+    if(serverMethods.counter < serverMethods.queue.length ){
+      serverMethods.useHandler(serverMethods.queue[serverMethods.counter]);
+    }
   },
 
   listen: function(port, fn){
     this.server.listen(port); 
     fn();
+    this.next();
   }
 
 };
