@@ -41,7 +41,7 @@ var serverMethods = {
     this.next();
   },
 
-  // Runs useHander if need be
+  // Runs useHander on the next item in the queue if need be
   next: function(){
     serverMethods.counter += 1;
     if(serverMethods.counter < serverMethods.queue.length ){
@@ -49,7 +49,7 @@ var serverMethods = {
     }
   },
 
-  // Creates server resonses for each .use case
+  // Creates server resonses for routes accoring to each .use case
   useHandler: function(use){
     var req;
     var res = {};
