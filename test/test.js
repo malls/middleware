@@ -1,6 +1,6 @@
 var server = require('../server');
 var request = require('request');
-var assert = require("assert");
+var assert = require('assert');
 
 describe('middleware', function(){
 
@@ -20,6 +20,12 @@ describe('middleware', function(){
 
     it('GET "/" should return "acend"', function(){
       request('http://localhost:3000/', function(err, res, body){
+        assert.equal("acend", body);
+      });
+    });
+
+    it('GET "/anthingelse" should return "acend"', function(){
+      request('http://localhost:3000/anythingelse', function(err, res, body){
         assert.equal("acend", body);
       });
     });
